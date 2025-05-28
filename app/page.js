@@ -14,7 +14,7 @@ export default function Home() {
         </p>
         <p className="mt-2 text-sm text-gray-500">
           Powered by<span className="font-semibold"> Begüm Yazılım</span>
-          <span className="">&copy; 2024</span>
+          <span className="">&copy; {new Date().getFullYear()}</span>
           <br />
           <span className="mt-4">❤️</span>
         </p>
