@@ -21,6 +21,46 @@ export default function ProductModal({ open, setOpen, product }) {
 
     return priceWithDot;
   };
+
+
+  // Local state for quantity
+  const [quantity, setQuantity] = useState(1);
+
+  // Sipariş Ver API isteği
+  const handleOrder = async (e) => {
+    e.stopPropagation();
+
+    console.log("PAYLOAD", {
+      urun_id: product.urun_id,
+      adet: quantity,
+    });
+
+    try {
+      const response = await fetch("/api/siparis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          urun_id: product.urun_id,
+          adet: quantity,
+        }),
+      });
+
+      console.log('RESPONSE', response);
+      console.log('RESPONSE BODY', response.body);
+
+      if (!response.ok) {
+        throw new Error("Sipariş oluşturulurken bir hata oluştu.");
+      }
+      const data = await response.json();
+      console.log('DATA', data);
+
+    } catch (err) {
+      // Hata yönetimi ekleyebilirsiniz
+      alert("Sipariş verilirken bir hata oluştu.");
+    }
+  };
+
+
   return (
     <Transition.Root show={open} as={Fragment}>
       <Dialog
@@ -53,7 +93,7 @@ export default function ProductModal({ open, setOpen, product }) {
             >
               <Dialog.Panel
                 className="relative transform overflow-hidden rounded-lg text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg"
-               
+
               >
                 <div
                   style={{
@@ -85,23 +125,59 @@ export default function ProductModal({ open, setOpen, product }) {
 
                       <div className="mt-3">
                         <p className="tracking-tight"
-                         style={{
-                          color:
-                            theme?.selectedProduct?.productPrice
-                              ?.fontColor,
-                          fontSize:
-                            `${theme?.selectedProduct?.productPrice
-                              ?.fontSize}px`,
-                          fontFamily:
-                            theme?.selectedProduct?.productPrice
-                              ?.fontStyle,
-                        }}
+                          style={{
+                            color:
+                              theme?.selectedProduct?.productPrice
+                                ?.fontColor,
+                            fontSize:
+                              `${theme?.selectedProduct?.productPrice
+                                ?.fontSize}px`,
+                            fontFamily:
+                              theme?.selectedProduct?.productPrice
+                                ?.fontStyle,
+                          }}
                         >
                           ₺{formatPrice(parseInt(product?.fiyat))}
                         </p>
+                        <div className="text-gray-700 font-bold mt-3">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              className={`px-2 py-1 rounded ${quantity === 1
+                                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                                  : "bg-gray-200 hover:bg-gray-300"
+                                }`}
+                              disabled={quantity === 1}
+                              onClick={e => {
+                                e.stopPropagation();
+                                if (quantity > 1) setQuantity(quantity - 1);
+                              }}
+                            >
+                              -
+                            </button>
+                            <span className="px-2">{quantity}</span>
+                            <button
+                              type="button"
+                              className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                              onClick={e => {
+                                e.stopPropagation();
+                                setQuantity(quantity + 1);
+                              }}
+                            >
+                              +
+                            </button>
+                            <button
+                              type="button"
+                              className="ml-4 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                              onClick={handleOrder}
+                            >
+                              Sipariş Ver
+                            </button>
+                          </div>
+                        </div>
                       </div>
                       <div className="mt-3">
-                        <p className={`text-sm tracking-tight font-bold  text-black mb-4 ${!product?.icerik && "hidden"}`}   style={{
+                        <p className={`text-sm tracking-tight font-bold  text-black mb-4 ${!product?.icerik && "hidden"}`} style={{
                           color:
                             theme?.selectedProduct?.productName
                               ?.fontColor,
@@ -126,14 +202,14 @@ export default function ProductModal({ open, setOpen, product }) {
                             fontFamily:
                               theme?.selectedProduct?.productDetail
                                 ?.fontStyle,
-                          }}  
+                          }}
                           dangerouslySetInnerHTML={{
                             __html: product?.icerik ? product?.icerik : "",
                           }}
                         />
                       </div>
                       <div className="mt-3">
-                        <p className={`text-sm tracking-tight font-bold  text-black mb-4 ${!product?.aciklama && "hidden"}`}   style={{
+                        <p className={`text-sm tracking-tight font-bold  text-black mb-4 ${!product?.aciklama && "hidden"}`} style={{
                           color:
                             theme?.selectedProduct?.productName
                               ?.fontColor,
@@ -158,14 +234,14 @@ export default function ProductModal({ open, setOpen, product }) {
                             fontFamily:
                               theme?.selectedProduct?.productDescription
                                 ?.fontStyle,
-                          }}  
+                          }}
                           dangerouslySetInnerHTML={{
                             __html: product?.aciklama ? product?.aciklama : "",
                           }}
                         />
                       </div>
                       <div className="mt-3">
-                        <p className={`text-sm tracking-tight font-bold  text-black mb-4 ${!product?.alerjen && "hidden"}`}   style={{
+                        <p className={`text-sm tracking-tight font-bold  text-black mb-4 ${!product?.alerjen && "hidden"}`} style={{
                           color:
                             theme?.selectedProduct?.productName
                               ?.fontColor,
@@ -190,7 +266,7 @@ export default function ProductModal({ open, setOpen, product }) {
                             fontFamily:
                               theme?.selectedProduct?.productDescription
                                 ?.fontStyle,
-                          }}  
+                          }}
                           dangerouslySetInnerHTML={{
                             __html: product?.alerjen ? product?.alerjen : "",
                           }}
